@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Objednávka Motorové Pily</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+}
+
+h1 {
+    text-align: center;
+    background: #2a72d4;
+    color: white;
+    padding: 20px;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    font-size: 18px;
+}
+
+input[type="number"] {
+    width: 70px;
+    text-align: center;
+}
+
+input[type="text"], input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+label {
+    margin-top: 15px;
+    display: block;
+    font-weight: bold;
+}
+
+#celkem, #pocet {
+    text-align: center;
+    font-size: 22px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2a72d4;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 30px;
+    font-size: 24px;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #e85a28;
+}
+</style>
+</head>
+
+<body>
+<h1>Stihl by Fido - Motor - Pily</h1>
+
+<div class="container">
+    <div id="items"></div>
+
+    <div id="celkem">Celková cena: 0 Kč</div>
+    <div id="pocet">Počet kusů: 0</div>
+
+    <!-- ✅ NOVÁ VSTUPNÍ POLE -->
+    <label>VAŠE JMÉNO (Příjmení Jméno):</label>
+    <input type="text" id="jmeno" placeholder="Novák Jan">
+
+    <label>TELEFON:</label>
+    <input type="tel" id="telefon" placeholder="+420 000 000 000">
+
+    <!-- ✅ TLAČÍTKO -->
+    <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
+</div>
+
+<script>
+let items = [];
+
+async function loadCSV() {
+    const res = await fetch("data_bufet.csv?t=" + Date.now());
+    const text = await res.text();
+    parseCSV(text);
+    renderItems();
+}
+
+function parseCSV(text) {
+    const lines = text.split("\n");
+    items = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const [nazev, cena] = lines[i].split(";");
+        if (!nazev) continue;
+
+        items.push({
+            nazev: nazev.trim(),
+            cena: parseFloat(cena),
+            mnozstvi: 0
+        });
+    }
+}
+
+function renderItems() {
+    const container = document.getElementById("items");
+    container.innerHTML = "";
+
+    items.forEach((item, i) => {
+        container.innerHTML += `
+            <div class="item">
+                <span>${item.nazev} (${item.cena} Kč)</span>
+                <input type="number" min="0"
+                 onchange="updateItem(${i},this.value)">
+            </div>
+        `;
+    });
+}
+
+function updateItem(i, val) {
+    items[i].mnozstvi = parseInt(val) || 0;
+    updateSummary();
+}
+
+function updateSummary() {
+    let total = 0, count = 0;
+
+    items.forEach(i => {
+        total += i.cena * i.mnozstvi;
+        count += i.mnozstvi;
+    });
+
+    document.getElementById("celkem").innerText =
+        "Celková cena: " + total.toFixed(2) + " Kč";
+
+    document.getElementById("pocet").innerText =
+        "Počet kusů: " + count;
+}
+
+/* ✅ HLAVNÍ MAILTO FUNKCE */
+function odeslatObjednavku() {
+
+    const jmeno = document.getElementById("jmeno").value.trim();
+    const telefon = document.getElementById("telefon").value.trim();
+
+    if (!jmeno || !telefon) {
+        alert("Vyplň jméno a telefon!");
+        return;
+    }
+
+    let text = "";
+    let total = 0;
+    let count = 0;
+
+    items.forEach(i => {
+        if (i.mnozstvi > 0) {
+            let cena = i.mnozstvi * i.cena;
+            text += `${i.nazev}: ${i.mnozstvi} ks - ${cena} Kč\n`;
+            total += cena;
+            count += i.mnozstvi;
+        }
+    });
+
+    if (count === 0) {
+        alert("Nevybral jsi nic!");
+        return;
+    }
+
+    const body =
+`Jméno: ${jmeno}
+Telefon: ${telefon}
+
+Objednávka:
+${text}
+
+Počet kusů: ${count}
+Celkem: ${total.toFixed(2)} Kč`;
+
+    // ✅ MAILTO LINK
+    const mail =
+        "mailto:sedlacek.filip@kostka-skola.cz" +
+        "?subject=Objednávka bufet" +
+        "&body=" + encodeURIComponent(body);
+
+    window.location.href = mail;
+}
+
+loadCSV();
+</script>
+</body>
+</html>
