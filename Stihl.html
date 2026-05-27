@@ -6,71 +6,71 @@
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #f4f7fb;
 }
+
 h1 {
     text-align: center;
     background: #2a72d4;
     color: white;
     padding: 20px;
 }
+
 .container {
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     margin: 30px auto;
     background: white;
     padding: 25px;
     border-radius: 12px;
 }
+
 .item {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     margin: 12px 0;
-    font-size: 18px;
+    gap: 10px;
 }
+
+/* ✅ obrázek */
+.item img {
+    width: 80px;
+    height: 60px;
+    object-fit: contain;
+}
+
 input[type="number"] {
-    width: 70px;
+    width: 60px;
     text-align: center;
 }
-input[type="text"], input[type="tel"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 16px;
-}
-label {
-    margin-top: 15px;
-    display: block;
-    font-weight: bold;
-}
+
 #celkem, #pocet {
     text-align: center;
-    font-size: 22px;
-    margin-top: 15px;
+    font-size: 20px;
+    margin-top: 10px;
     font-weight: bold;
     color: #2a72d4;
 }
+
 button {
     width: 100%;
     padding: 15px;
-    margin-top: 30px;
-    font-size: 24px;
-    background: #ff6b35;
+    margin-top: 20px;
+    font-size: 20px;
+    background: orange;
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-}
-button:hover {
-    background: #e85a28;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Stihl by Fido - Motorové pily</h1>
+<h1>Stihl – Motorové pily</h1>
 
 <div class="container">
     <div id="items"></div>
@@ -78,20 +78,23 @@ button:hover {
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
-    <label>VAŠE JMÉNO:</label>
-    <input type="text" id="jmeno" placeholder="Novák Jan">
-
-    <label>TELEFON:</label>
-    <input type="tel" id="telefon" placeholder="+420 000 000 000">
-
-    <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
+    <button onclick="odeslatObjednavku()">ODESLAT</button>
 </div>
 
 <script>
 
 let items = [];
 
-// ✅ OPRAVA – správný název CSV
+/* ✅ MAPA OBRÁZKŮ */
+const images = {
+    "MS 391": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
+    "MS 462": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
+    "MS 462 C-M R": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
+    "MS 881": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
+    "MS 400 C-M": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg"
+};
+
+/* ✅ načtení CSV */
 async function loadCSV() {
     const res = await fetch("Stihl.csv?t=" + Date.now());
     const text = await res.text();
@@ -120,11 +123,14 @@ function renderItems() {
     container.innerHTML = "";
 
     items.forEach((item, i) => {
+
+        const img = images[item.nazev] || "https://via.placeholder.com/80";
+
         container.innerHTML += `
             <div class="item">
-                <span>${item.nazev} (${item.cena} Kč)</span>
+                <img src="${img        <span>${item.nazev}<br>${item.cena} Kč</span>
                 <input type="number" min="0"
-                 onchange="updateItem(${i}, this.value)">
+                    onchange="updateItem(${i}, this.value)">
             </div>
         `;
     });
@@ -136,7 +142,8 @@ function updateItem(i, val) {
 }
 
 function updateSummary() {
-    let total = 0, count = 0;
+    let total = 0;
+    let count = 0;
 
     items.forEach(i => {
         total += i.cena * i.mnozstvi;
@@ -144,55 +151,14 @@ function updateSummary() {
     });
 
     document.getElementById("celkem").innerText =
-        "Celková cena: " + total.toFixed(2) + " Kč";
+        "Celková cena: " + total + " Kč";
 
     document.getElementById("pocet").innerText =
         "Počet kusů: " + count;
 }
 
 function odeslatObjednavku() {
-    const jmeno = document.getElementById("jmeno").value.trim();
-    const telefon = document.getElementById("telefon").value.trim();
-
-    if (!jmeno || !telefon) {
-        alert("Vyplň jméno a telefon!");
-        return;
-    }
-
-    let text = "";
-    let total = 0;
-    let count = 0;
-
-    items.forEach(i => {
-        if (i.mnozstvi > 0) {
-            let cena = i.mnozstvi * i.cena;
-            text += `${i.nazev}: ${i.mnozstvi} ks - ${cena} Kč\n`;
-            total += cena;
-            count += i.mnozstvi;
-        }
-    });
-
-    if (count === 0) {
-        alert("Nevybral jsi nic!");
-        return;
-    }
-
-    const body =
-`Jméno: ${jmeno}
-Telefon: ${telefon}
-
-Objednávka:
-${text}
-
-Počet kusů: ${count}
-Celkem: ${total.toFixed(2)} Kč`;
-
-    const mail =
-        "mailto:sedlacek.filip@kostka-skola.cz" +
-        "?subject=Objednávka pily" +
-        "&body=" + encodeURIComponent(body);
-
-    window.location.href = mail;
+    alert("Objednávka odeslána (demo)");
 }
 
 loadCSV();
