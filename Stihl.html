@@ -1,141 +1,203 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stihl by Fido - Motor - Pily</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<title>Objednávka Motorové Pily</title>
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f6f6f6;
-      color: #111;
-    }
-
-    .page {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #fff;
-      min-height: 100vh;
-    }
-
-    .logo-wrap {
-      text-align: center;
-      padding: 10px 0 25px;
-    }
-
-    .logo {
-      width: 420px;
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: 28px;
-      text-align: center;
-    }
-
-    .subtitle {
-      text-align: center;
-      margin: 0 0 25px;
-      font-size: 18px;
-      color: #444;
-    }
-
-    .summary {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin: 20px 0;
-      padding: 16px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background: #fafafa;
-    }
-
-    .summary div {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .form-box {
-      margin-top: 20px;
-      padding: 18px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background: #fff;
-    }
-
-    label {
-      display: block;
-      margin: 14px 0 6px;
-      font-weight: 700;
-    }
-
-    input,
-    textarea,
-    button {
-      width: 100%;
-      font: inherit;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #bbb;
-    }
-
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    button {
-      margin-top: 18px;
-      border: 0;
-      background: #0f6b3a;
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0c5830;
-    }
-  </style>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+}
+h1 {
+    text-align: center;
+    background: #2a72d4;
+    color: white;
+    padding: 20px;
+}
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+}
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    font-size: 18px;
+}
+input[type="number"] {
+    width: 70px;
+    text-align: center;
+}
+input[type="text"], input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+label {
+    margin-top: 15px;
+    display: block;
+    font-weight: bold;
+}
+#celkem, #pocet {
+    text-align: center;
+    font-size: 22px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2a72d4;
+}
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 30px;
+    font-size: 24px;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+button:hover {
+    background: #e85a28;
+}
+</style>
 </head>
+
 <body>
-  <div class="page">
-    <div class="logo-wrap">
-      <img src="stihl-foto.jpg" alt="STIHL by Fido" class="logo" />
-    </div>
 
-    <h1>Stihl by Fido - Motor - Pily</h1>
-    <p class="subtitle">Objednávkový formulář</p>
+<h1>Stihl by Fido - Motorové pily</h1>
 
-    <div class="summary">
-      <div>Celková cena: <span id="totalPrice">0 Kč</span></div>
-      <div>Počet kusů: <span id="totalCount">0</span></div>
-    </div>
+<div class="container">
+    <div id="items"></div>
 
-    <div class="form-box">
-      <label for="name">VAŠE JMÉNO (Příjmení Jméno):</label>
-      <input id="name" type="text" placeholder="Např. Novák Jan" />
+    <div id="celkem">Celková cena: 0 Kč</div>
+    <div id="pocet">Počet kusů: 0</div>
 
-      <label for="phone">TELEFON:</label>
-      <input id="phone" type="tel" placeholder="Např. 777 123 456" />
+    <label>VAŠE JMÉNO:</label>
+    <input type="text" id="jmeno" placeholder="Novák Jan">
 
-      <label for="note">Poznámka:</label>
-      <textarea id="note" placeholder="Doplňte svou objednávku..."></textarea>
+    <label>TELEFON:</label>
+    <input type="tel" id="telefon" placeholder="+420 000 000 000">
 
-      <button type="button">ODESLAT OBJEDNÁVKU</button>
-    </div>
-  </div>
+    <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
+</div>
+
+<script>
+
+let items = [];
+
+// ✅ OPRAVA – správný název CSV
+async function loadCSV() {
+    const res = await fetch("Stihl.csv?t=" + Date.now());
+    const text = await res.text();
+    parseCSV(text);
+    renderItems();
+}
+
+function parseCSV(text) {
+    const lines = text.split("\n");
+    items = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const [nazev, cena] = lines[i].split(";");
+        if (!nazev) continue;
+
+        items.push({
+            nazev: nazev.trim(),
+            cena: parseFloat(cena),
+            mnozstvi: 0
+        });
+    }
+}
+
+function renderItems() {
+    const container = document.getElementById("items");
+    container.innerHTML = "";
+
+    items.forEach((item, i) => {
+        container.innerHTML += `
+            <div class="item">
+                <span>${item.nazev} (${item.cena} Kč)</span>
+                <input type="number" min="0"
+                 onchange="updateItem(${i}, this.value)">
+            </div>
+        `;
+    });
+}
+
+function updateItem(i, val) {
+    items[i].mnozstvi = parseInt(val) || 0;
+    updateSummary();
+}
+
+function updateSummary() {
+    let total = 0, count = 0;
+
+    items.forEach(i => {
+        total += i.cena * i.mnozstvi;
+        count += i.mnozstvi;
+    });
+
+    document.getElementById("celkem").innerText =
+        "Celková cena: " + total.toFixed(2) + " Kč";
+
+    document.getElementById("pocet").innerText =
+        "Počet kusů: " + count;
+}
+
+function odeslatObjednavku() {
+    const jmeno = document.getElementById("jmeno").value.trim();
+    const telefon = document.getElementById("telefon").value.trim();
+
+    if (!jmeno || !telefon) {
+        alert("Vyplň jméno a telefon!");
+        return;
+    }
+
+    let text = "";
+    let total = 0;
+    let count = 0;
+
+    items.forEach(i => {
+        if (i.mnozstvi > 0) {
+            let cena = i.mnozstvi * i.cena;
+            text += `${i.nazev}: ${i.mnozstvi} ks - ${cena} Kč\n`;
+            total += cena;
+            count += i.mnozstvi;
+        }
+    });
+
+    if (count === 0) {
+        alert("Nevybral jsi nic!");
+        return;
+    }
+
+    const body =
+`Jméno: ${jmeno}
+Telefon: ${telefon}
+
+Objednávka:
+${text}
+
+Počet kusů: ${count}
+Celkem: ${total.toFixed(2)} Kč`;
+
+    const mail =
+        "mailto:sedlacek.filip@kostka-skola.cz" +
+        "?subject=Objednávka pily" +
+        "&body=" + encodeURIComponent(body);
+
+    window.location.href = mail;
+}
+
+loadCSV();
+
+</script>
+
 </body>
 </html>
