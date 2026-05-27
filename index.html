@@ -2,27 +2,29 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>Objednávka Motorové Pily</title>
-<img src="${img
+<title>Stihl – Motorové pily</title>
+
 <style>
 body {
     font-family: Arial;
     background: #f4f7fb;
+    margin: 0;
 }
 
 h1 {
     text-align: center;
-    background: #2a72d4;
+    background: #ff6b35;
     color: white;
     padding: 20px;
+    margin: 0;
 }
 
 .container {
     width: 90%;
-    max-width: 600px;
-    margin: 30px auto;
+    max-width: 700px;
+    margin: 20px auto;
     background: white;
-    padding: 25px;
+    padding: 20px;
     border-radius: 12px;
 }
 
@@ -30,18 +32,22 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 12px 0;
-    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
 }
 
-/* ✅ obrázek */
 .item img {
     width: 80px;
     height: 60px;
     object-fit: contain;
 }
 
-input[type="number"] {
+.name {
+    flex: 1;
+    margin-left: 10px;
+}
+
+input {
     width: 60px;
     text-align: center;
 }
@@ -51,7 +57,7 @@ input[type="number"] {
     font-size: 20px;
     margin-top: 10px;
     font-weight: bold;
-    color: #2a72d4;
+    color: #ff6b35;
 }
 
 button {
@@ -59,7 +65,7 @@ button {
     padding: 15px;
     margin-top: 20px;
     font-size: 20px;
-    background: orange;
+    background: #2a72d4;
     color: white;
     border: none;
     border-radius: 10px;
@@ -73,19 +79,21 @@ button {
 <h1>Stihl – Motorové pily</h1>
 
 <div class="container">
+
     <div id="items"></div>
 
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
-    <button onclick="odeslatObjednavku()">ODESLAT</button>
+    <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
+
 </div>
 
 <script>
 
 let items = [];
 
-/* ✅ MAPA OBRÁZKŮ */
+/* ✅ obrázky podle názvu */
 const images = {
     "MS 391": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
     "MS 462": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
@@ -96,12 +104,18 @@ const images = {
 
 /* ✅ načtení CSV */
 async function loadCSV() {
-    const res = await fetch("Stihl.csv?t=" + Date.now());
-    const text = await res.text();
-    parseCSV(text);
-    renderItems();
+    try {
+        const res = await fetch("Stihl.csv");
+        const text = await res.text();
+        parseCSV(text);
+        renderItems();
+    } catch (e) {
+        document.getElementById("items").innerHTML =
+            "<p style='color:red'>Chyba při načítání CSV!</p>";
+    }
 }
 
+/* ✅ převod CSV → data */
 function parseCSV(text) {
     const lines = text.split("\n");
     items = [];
@@ -118,6 +132,7 @@ function parseCSV(text) {
     }
 }
 
+/* ✅ vykreslení */
 function renderItems() {
     const container = document.getElementById("items");
     container.innerHTML = "";
@@ -128,7 +143,11 @@ function renderItems() {
 
         container.innerHTML += `
             <div class="item">
-                <img src="${img        <span>${item.nazev}<br>${item.cena} Kč</span>
+                <imgg}
+                <div class="name">
+                    <b>${item.nazev}</b><br>
+                    ${item.cena} Kč
+                </div>
                 <input type="number" min="0"
                     onchange="updateItem(${i}, this.value)">
             </div>
@@ -136,11 +155,13 @@ function renderItems() {
     });
 }
 
+/* ✅ změna množství */
 function updateItem(i, val) {
     items[i].mnozstvi = parseInt(val) || 0;
     updateSummary();
 }
 
+/* ✅ výpočet */
 function updateSummary() {
     let total = 0;
     let count = 0;
@@ -157,10 +178,12 @@ function updateSummary() {
         "Počet kusů: " + count;
 }
 
+/* ✅ odeslání */
 function odeslatObjednavku() {
     alert("Objednávka odeslána (demo)");
 }
 
+/* ✅ start */
 loadCSV();
 
 </script>
