@@ -1,6 +1,0 @@
-zbozi	cena
-MS 391	20 000 Kč
-MS 462	30 790 Kč
-MS 462 C-M R	46 790 Kč
-MS 881	51 490 Kč
-MS 400 C-M	27 990 Kč
