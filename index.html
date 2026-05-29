@@ -14,6 +14,11 @@ h1 {
     color: white;
     padding: 20px;
 }
+.logo {
+    display: block;
+    margin: 20px auto;
+    max-width: 300px;
+}
 .container {
     width: 90%;
     max-width: 600px;
@@ -29,16 +34,11 @@ h1 {
     margin: 12px 0;
     gap: 10px;
 }
-.item img {
-    width: 80px;
-    height: 60px;
-    object-fit: contain;
-}
 input[type="number"] {
     width: 60px;
     text-align: center;
 }
-input, textarea {
+input {
     width: 100%;
     padding: 10px;
     margin-top: 8px;
@@ -68,7 +68,11 @@ button {
 </style>
 </head>
 <body>
+
 <h1>Stihl – Motorové pily</h1>
+
+<!-- ✅ jeden hlavní obrázek -->
+stihl foto.png
 
 <div class="container">
 
@@ -90,14 +94,6 @@ button {
 
 <script>
 let items = [];
-
-const images = {
-    "MS 391": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
-    "MS 462": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
-    "MS 462 C-M R": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
-    "MS 881": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
-    "MS 400 C-M": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg"
-};
 
 async function loadCSV() {
     const res = await fetch("Stihl.csv?t=" + Date.now());
@@ -125,11 +121,9 @@ function renderItems() {
     container.innerHTML = "";
 
     items.forEach((item, i) => {
-        const img = images[item.nazev] || "https://via.placeholder.com/80";
         container.innerHTML += `
             <div class="item">
-                ${img}
-                <span>${item.nazev}<br>${item.cena} Kč</span>
+                <span>${item.nazev} - ${item.cena} Kč</span>
                 <input type="number" min="0"
                     onchange="updateItem(${i}, this.value)">
             </div>
