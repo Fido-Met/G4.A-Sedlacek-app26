@@ -2,98 +2,95 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>Stihl – Motorové pily</title>
-
+<title>Objednávka Motorové Pily</title>
 <style>
 body {
     font-family: Arial;
     background: #f4f7fb;
-    margin: 0;
 }
-
 h1 {
     text-align: center;
-    background: #ff6b35;
+    background: #2a72d4;
     color: white;
     padding: 20px;
-    margin: 0;
 }
-
 .container {
     width: 90%;
-    max-width: 700px;
-    margin: 20px auto;
+    max-width: 600px;
+    margin: 30px auto;
     background: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 12px;
 }
-
 .item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
+    margin: 12px 0;
+    gap: 10px;
 }
-
 .item img {
     width: 80px;
     height: 60px;
     object-fit: contain;
 }
-
-.name {
-    flex: 1;
-    margin-left: 10px;
-}
-
-input {
+input[type="number"] {
     width: 60px;
     text-align: center;
 }
-
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
 #celkem, #pocet {
     text-align: center;
     font-size: 20px;
     margin-top: 10px;
     font-weight: bold;
-    color: #ff6b35;
+    color: #2a72d4;
 }
-
 button {
     width: 100%;
     padding: 15px;
     margin-top: 20px;
     font-size: 20px;
-    background: #2a72d4;
+    background: orange;
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
 }
+.error {
+    border: 2px solid red;
+}
 </style>
 </head>
-
 <body>
-
 <h1>Stihl – Motorové pily</h1>
 
 <div class="container">
+
+    <h3>Údaje zákazníka</h3>
+    <input id="jmeno" placeholder="Jméno" required>
+    <input id="prijmeni" placeholder="Příjmení" required>
+    <input id="email" type="email" placeholder="Email" required>
+    <input id="telefon" placeholder="Telefon" required>
+
+    <hr>
 
     <div id="items"></div>
 
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
-    <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
-
+    <button onclick="odeslatObjednavku()">ODESLAT</button>
 </div>
 
 <script>
-
 let items = [];
 
-/* ✅ obrázky podle názvu */
 const images = {
     "MS 391": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
     "MS 462": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg",
@@ -102,28 +99,19 @@ const images = {
     "MS 400 C-M": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Chainsaw.jpg"
 };
 
-/* ✅ načtení CSV */
 async function loadCSV() {
-    try {
-        const res = await fetch("Stihl.csv");
-        const text = await res.text();
-        parseCSV(text);
-        renderItems();
-    } catch (e) {
-        document.getElementById("items").innerHTML =
-            "<p style='color:red'>Chyba při načítání CSV!</p>";
-    }
+    const res = await fetch("Stihl.csv?t=" + Date.now());
+    const text = await res.text();
+    parseCSV(text);
+    renderItems();
 }
 
-/* ✅ převod CSV → data */
 function parseCSV(text) {
     const lines = text.split("\n");
     items = [];
-
     for (let i = 1; i < lines.length; i++) {
         const [nazev, cena] = lines[i].split(";");
         if (!nazev) continue;
-
         items.push({
             nazev: nazev.trim(),
             cena: parseFloat(cena),
@@ -132,22 +120,16 @@ function parseCSV(text) {
     }
 }
 
-/* ✅ vykreslení */
 function renderItems() {
     const container = document.getElementById("items");
     container.innerHTML = "";
 
     items.forEach((item, i) => {
-
         const img = images[item.nazev] || "https://via.placeholder.com/80";
-
         container.innerHTML += `
             <div class="item">
-                <imgg}
-                <div class="name">
-                    <b>${item.nazev}</b><br>
-                    ${item.cena} Kč
-                </div>
+                ${img}
+                <span>${item.nazev}<br>${item.cena} Kč</span>
                 <input type="number" min="0"
                     onchange="updateItem(${i}, this.value)">
             </div>
@@ -155,13 +137,11 @@ function renderItems() {
     });
 }
 
-/* ✅ změna množství */
 function updateItem(i, val) {
     items[i].mnozstvi = parseInt(val) || 0;
     updateSummary();
 }
 
-/* ✅ výpočet */
 function updateSummary() {
     let total = 0;
     let count = 0;
@@ -178,15 +158,49 @@ function updateSummary() {
         "Počet kusů: " + count;
 }
 
-/* ✅ odeslání */
-function odeslatObjednavku() {
-    alert("Objednávka odeslána (demo)");
+function validateForm() {
+    let valid = true;
+
+    const fields = [
+        "jmeno",
+        "prijmeni",
+        "email",
+        "telefon"
+    ];
+
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove("error");
+
+        if (!el.value.trim()) {
+            el.classList.add("error");
+            valid = false;
+        }
+    });
+
+    return valid;
 }
 
-/* ✅ start */
+function odeslatObjednavku() {
+    if (!validateForm()) {
+        alert("Prosím vyplň všechny povinné údaje!");
+        return;
+    }
+
+    const data = {
+        jmeno: document.getElementById("jmeno").value,
+        prijmeni: document.getElementById("prijmeni").value,
+        email: document.getElementById("email").value,
+        telefon: document.getElementById("telefon").value,
+        objednavka: items.filter(i => i.mnozstvi > 0)
+    };
+
+    console.log(data);
+
+    alert("Objednávka odeslána ✅");
+}
+
 loadCSV();
-
 </script>
-
 </body>
 </html>
