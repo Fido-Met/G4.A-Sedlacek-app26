@@ -32,7 +32,12 @@ h1 {
     align-items: center;
     justify-content: space-between;
     margin: 12px 0;
-    gap: 10px;
+}
+.summary {
+    margin-top: 20px;
+    background: #eef4ff;
+    padding: 10px;
+    border-radius: 8px;
 }
 input[type="number"] {
     width: 60px;
@@ -71,7 +76,7 @@ button {
 
 <h1>Stihl – Motorové pily</h1>
 
-<!-- ✅ jeden hlavní obrázek -->
+<!-- ✅ správný obrázek -->
 stihl foto.png
 
 <div class="container">
@@ -88,6 +93,12 @@ stihl foto.png
 
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
+
+    <!-- ✅ SHRnutí OBJEDNÁVKY -->
+    <div class="summary">
+        <h3>Shrnutí objednávky</h3>
+        <div id="summaryList">Žádné produkty</div>
+    </div>
 
     <button onclick="odeslatObjednavku()">ODESLAT</button>
 </div>
@@ -150,17 +161,33 @@ function updateSummary() {
 
     document.getElementById("pocet").innerText =
         "Počet kusů: " + count;
+
+    renderSummary();
+}
+
+function renderSummary() {
+    const summaryDiv = document.getElementById("summaryList");
+
+    const selected = items.filter(i => i.mnozstvi > 0);
+
+    if (selected.length === 0) {
+        summaryDiv.innerHTML = "Žádné produkty";
+        return;
+    }
+
+    summaryDiv.innerHTML = "";
+
+    selected.forEach(i => {
+        summaryDiv.innerHTML += `
+            ${i.nazev} - ${i.mnozstvi} ks (${i.cena * i.mnozstvi} Kč)<br>
+        `;
+    });
 }
 
 function validateForm() {
     let valid = true;
 
-    const fields = [
-        "jmeno",
-        "prijmeni",
-        "email",
-        "telefon"
-    ];
+    const fields = ["jmeno","prijmeni","email","telefon"];
 
     fields.forEach(id => {
         const el = document.getElementById(id);
@@ -180,16 +207,6 @@ function odeslatObjednavku() {
         alert("Prosím vyplň všechny povinné údaje!");
         return;
     }
-
-    const data = {
-        jmeno: document.getElementById("jmeno").value,
-        prijmeni: document.getElementById("prijmeni").value,
-        email: document.getElementById("email").value,
-        telefon: document.getElementById("telefon").value,
-        objednavka: items.filter(i => i.mnozstvi > 0)
-    };
-
-    console.log(data);
 
     alert("Objednávka odeslána ✅");
 }
