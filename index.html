@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Objednávka Motorové Pily</title>
+
 <style>
 body {
     font-family: Arial;
@@ -13,11 +14,6 @@ h1 {
     background: #2a72d4;
     color: white;
     padding: 20px;
-}
-.logo {
-    display: block;
-    margin: 20px auto;
-    max-width: 300px;
 }
 .container {
     width: 90%;
@@ -72,13 +68,10 @@ button {
 }
 </style>
 </head>
+
 <body>
 
 <h1>Stihl – Motorové pily</h1>
-
-<!-- ✅ TVŮJ OBRÁZEK -->
-<img src="stihl foto.png" class="logo">
-
 
 <div class="container">
 
@@ -95,16 +88,17 @@ button {
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
-    <!-- ✅ SHRnutí OBJEDNÁVKY -->
     <div class="summary">
         <h3>Shrnutí objednávky</h3>
         <div id="summaryList">Žádné produkty</div>
     </div>
 
     <button onclick="odeslatObjednavku()">ODESLAT</button>
+
 </div>
 
 <script>
+
 let items = [];
 
 async function loadCSV() {
@@ -117,9 +111,11 @@ async function loadCSV() {
 function parseCSV(text) {
     const lines = text.split("\n");
     items = [];
+
     for (let i = 1; i < lines.length; i++) {
         const [nazev, cena] = lines[i].split(";");
         if (!nazev) continue;
+
         items.push({
             nazev: nazev.trim(),
             cena: parseFloat(cena),
@@ -168,7 +164,6 @@ function updateSummary() {
 
 function renderSummary() {
     const summaryDiv = document.getElementById("summaryList");
-
     const selected = items.filter(i => i.mnozstvi > 0);
 
     if (selected.length === 0) {
@@ -187,7 +182,6 @@ function renderSummary() {
 
 function validateForm() {
     let valid = true;
-
     const fields = ["jmeno","prijmeni","email","telefon"];
 
     fields.forEach(id => {
@@ -204,15 +198,54 @@ function validateForm() {
 }
 
 function odeslatObjednavku() {
+
     if (!validateForm()) {
         alert("Prosím vyplň všechny povinné údaje!");
         return;
     }
 
-    alert("Objednávka odeslána ✅");
+    const hasItems = items.some(i => i.mnozstvi > 0);
+    if (!hasItems) {
+        alert("Vyber alespoň jeden produkt!");
+        return;
+    }
+
+    const jmeno = document.getElementById("jmeno").value;
+    const prijmeni = document.getElementById("prijmeni").value;
+    const email = document.getElementById("email").value;
+    const telefon = document.getElementById("telefon").value;
+
+    let total = 0;
+
+    let message = "OBJEDNÁVKA - Motorové pily\n\n";
+
+    message += "Zákazník:\n";
+    message += jmeno + " " + prijmeni + "\n";
+    message += "Email: " + email + "\n";
+    message += "Telefon: " + telefon + "\n\n";
+
+    message += "Objednané produkty:\n";
+
+    items.forEach(i => {
+        if (i.mnozstvi > 0) {
+            const cena = i.cena * i.mnozstvi;
+            total += cena;
+            message += "- " + i.nazev + " | " + i.mnozstvi + " ks | " + cena + " Kč\n";
+        }
+    });
+
+    message += "\nCelková cena: " + total + " Kč\n";
+
+    const subject = encodeURIComponent("Nová objednávka");
+    const body = encodeURIComponent(message);
+
+    window.location.href =
+        `mailto:app@kostka-skola.cz?subject=${subject}&body=${body}`;
 }
 
 loadCSV();
+
 </script>
+
 </body>
 </html>
