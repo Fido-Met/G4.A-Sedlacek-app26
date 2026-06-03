@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Objednávka Motorové Pily</title>
-
 <style>
 body {
     font-family: Arial;
@@ -14,6 +13,11 @@ h1 {
     background: #2a72d4;
     color: white;
     padding: 20px;
+}
+.logo {
+    display: block;
+    margin: 20px auto;
+    max-width: 300px;
 }
 .container {
     width: 90%;
@@ -68,10 +72,12 @@ button {
 }
 </style>
 </head>
-
 <body>
 
 <h1>Stihl – Motorové pily</h1>
+
+<!-- ✅ správný obrázek -->
+stihl foto.png
 
 <div class="container">
 
@@ -88,17 +94,16 @@ button {
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
+    <!-- ✅ SHRnutí OBJEDNÁVKY -->
     <div class="summary">
         <h3>Shrnutí objednávky</h3>
         <div id="summaryList">Žádné produkty</div>
     </div>
 
     <button onclick="odeslatObjednavku()">ODESLAT</button>
-
 </div>
 
 <script>
-
 let items = [];
 
 async function loadCSV() {
@@ -111,11 +116,9 @@ async function loadCSV() {
 function parseCSV(text) {
     const lines = text.split("\n");
     items = [];
-
     for (let i = 1; i < lines.length; i++) {
         const [nazev, cena] = lines[i].split(";");
         if (!nazev) continue;
-
         items.push({
             nazev: nazev.trim(),
             cena: parseFloat(cena),
@@ -164,6 +167,7 @@ function updateSummary() {
 
 function renderSummary() {
     const summaryDiv = document.getElementById("summaryList");
+
     const selected = items.filter(i => i.mnozstvi > 0);
 
     if (selected.length === 0) {
@@ -182,6 +186,7 @@ function renderSummary() {
 
 function validateForm() {
     let valid = true;
+
     const fields = ["jmeno","prijmeni","email","telefon"];
 
     fields.forEach(id => {
@@ -198,13 +203,15 @@ function validateForm() {
 }
 
 function odeslatObjednavku() {
-
     if (!validateForm()) {
         alert("Prosím vyplň všechny povinné údaje!");
         return;
     }
 
-    const hasItems = items.some(i => i.mnozstvi > 0);
+    alert("Objednávka odeslána ✅");
+}
+
+const hasItems = items.some(i => i.mnozstvi > 0);
     if (!hasItems) {
         alert("Vyber alespoň jeden produkt!");
         return;
@@ -243,9 +250,8 @@ function odeslatObjednavku() {
         `mailto:app@kostka-skola.cz?subject=${subject}&body=${body}`;
 }
 
+
 loadCSV();
-
 </script>
-
 </body>
 </html>
