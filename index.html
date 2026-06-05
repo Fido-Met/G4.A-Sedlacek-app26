@@ -76,16 +76,16 @@ button {
 
 <h1>Stihl – Motorové pily</h1>
 
-<!-- ✅ správný obrázek -->
-stihl foto.png
+<!-- ✅ OPRAVENÝ OBRÁZEK -->
+<img src="stihl foto.png" alt="Stihl logo" class="logo">
 
 <div class="container">
 
     <h3>Údaje zákazníka</h3>
-    <input id="jmeno" placeholder="Jméno" required>
-    <input id="prijmeni" placeholder="Příjmení" required>
-    <input id="email" type="email" placeholder="Email" required>
-    <input id="telefon" placeholder="Telefon" required>
+    <input id="jmeno" placeholder="Jméno">
+    <input id="prijmeni" placeholder="Příjmení">
+    <input id="email" type="email" placeholder="Email">
+    <input id="telefon" placeholder="Telefon">
 
     <hr>
 
@@ -94,16 +94,17 @@ stihl foto.png
     <div id="celkem">Celková cena: 0 Kč</div>
     <div id="pocet">Počet kusů: 0</div>
 
-    <!-- ✅ SHRnutí OBJEDNÁVKY -->
     <div class="summary">
         <h3>Shrnutí objednávky</h3>
         <div id="summaryList">Žádné produkty</div>
     </div>
 
     <button onclick="odeslatObjednavku()">ODESLAT</button>
+
 </div>
 
 <script>
+
 let items = [];
 
 async function loadCSV() {
@@ -116,12 +117,17 @@ async function loadCSV() {
 function parseCSV(text) {
     const lines = text.split("\n");
     items = [];
+
     for (let i = 1; i < lines.length; i++) {
         const [nazev, cena] = lines[i].split(";");
         if (!nazev) continue;
+
+        // ✅ odstranění " Kč" a mezer
+        const cistaCena = cena.replace("Kč", "").replace(/\s/g, "");
+
         items.push({
             nazev: nazev.trim(),
-            cena: parseFloat(cena),
+            cena: parseFloat(cistaCena),
             mnozstvi: 0
         });
     }
@@ -136,7 +142,7 @@ function renderItems() {
             <div class="item">
                 <span>${item.nazev} - ${item.cena} Kč</span>
                 <input type="number" min="0"
-                    onchange="updateItem(${i}, this.value)">
+                       onchange="updateItem(${i}, this.value)">
             </div>
         `;
     });
@@ -186,7 +192,6 @@ function renderSummary() {
 
 function validateForm() {
     let valid = true;
-
     const fields = ["jmeno","prijmeni","email","telefon"];
 
     fields.forEach(id => {
@@ -203,15 +208,14 @@ function validateForm() {
 }
 
 function odeslatObjednavku() {
+
     if (!validateForm()) {
         alert("Prosím vyplň všechny povinné údaje!");
         return;
     }
 
-    alert("Objednávka odeslána ✅");
-}
+    const hasItems = items.some(i => i.mnozstvi > 0);
 
-const hasItems = items.some(i => i.mnozstvi > 0);
     if (!hasItems) {
         alert("Vyber alespoň jeden produkt!");
         return;
@@ -223,7 +227,6 @@ const hasItems = items.some(i => i.mnozstvi > 0);
     const telefon = document.getElementById("telefon").value;
 
     let total = 0;
-
     let message = "OBJEDNÁVKA - Motorové pily\n\n";
 
     message += "Zákazník:\n";
@@ -250,8 +253,9 @@ const hasItems = items.some(i => i.mnozstvi > 0);
         `mailto:app@kostka-skola.cz?subject=${subject}&body=${body}`;
 }
 
-
 loadCSV();
+
 </script>
+
 </body>
 </html>
